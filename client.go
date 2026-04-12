@@ -192,10 +192,9 @@ func NewClient(remote_socket string) (*Client, error) {
 	return &Client{remote_addr: remote_addr, local_addr: local_addr, conn: conn}, nil
 }
 
+// Close closes the connection and removes the local socket file
 func (c *Client) Close() error {
-	defer os.Remove(c.local_addr.Name)
-
-	return c.conn.Close()
+	return errors.Join(c.conn.Close(), os.Remove(c.local_addr.Name))
 }
 
 // Do sends command to hostapd
@@ -340,7 +339,7 @@ loop:
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return nil
 		default:
 		}
 
